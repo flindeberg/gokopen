@@ -8,16 +8,19 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name="users")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class User {
     private Integer id;
     private String username;
     private String password;
     private boolean enabled = true;
     private String role;
-//    private List<ShopList> shoplists;
+
     
     public User(){
         
@@ -25,8 +28,8 @@ public class User {
     
     
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "user_sequence")
-    @SequenceGenerator(name = "user_sequence", sequenceName = "USER_SEQUENCE")
+    @SequenceGenerator(name = "userSeqGen", sequenceName = "USER_SEQ", initialValue = 100, allocationSize = 5)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "userSeqGen")
     @Column(name="userid", nullable=false)
     public Integer getId() {
         return id;

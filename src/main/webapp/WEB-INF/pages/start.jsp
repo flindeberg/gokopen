@@ -17,16 +17,22 @@
 ${errormsg}
 </div>
 </c:if>
+<div class="page-head">
 <h1>${config.name }</h1>
+</div>
 <ul>
 <li class="nav-item"><a href="${pageContext.request.contextPath}/score/">Rapportera poäng</a></li>
+<li class="nav-item"><a href="${pageContext.request.contextPath}/correctscore">Ändra poäng</a></li>
 <li class="nav-item"><a href="${pageContext.request.contextPath}/reports/patrols">Patruller</a></li>
 <li class="nav-item"><a href="${pageContext.request.contextPath}/reports/bytrack">Resultat per klass</a></li>
+<sec:authorize access="hasAnyRole('ROLE_ADMIN','ROLE_STARTFINISH')">
+<li class="nav-item"><a href="${pageContext.request.contextPath}/startfinish">Start- och måladministration</a>
+</sec:authorize>
 <sec:authorize access="hasRole('ROLE_ADMIN')">
-<li class="nav-item"><a href="${pageContext.request.contextPath}/print/start">Skriv ut listor</a></li>
 <li class="nav-item"><a href="${pageContext.request.contextPath}/admin/">Administration</a></li>
 </sec:authorize>
 </ul>
+<c:if test="${not empty config.phone }">Telefon till start/mål: <a href="tel:${config.phone }">${config.phone }</a><br></c:if>
 Inloggad användare: ${username }
 </div>
 </body>

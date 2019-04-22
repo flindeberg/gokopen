@@ -3,11 +3,17 @@ package se.gokopen.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name="track")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Track {
 	private Integer trackId;
 	private String trackName;
@@ -18,7 +24,8 @@ public class Track {
 	}
 
 	@Id
-	@GeneratedValue
+	@SequenceGenerator(name = "trackSeqGen", sequenceName = "TRACK_SEQ", initialValue = 100, allocationSize = 5)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "trackSeqGen")
 	@Column(name="trackid", nullable=false)
 	public Integer getTrackId() {
 		return trackId;

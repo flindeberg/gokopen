@@ -1,42 +1,44 @@
 package se.gokopen.dao;
 
-import java.util.Collections;
+
 import java.util.List;
 
+import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import se.gokopen.model.PatrolImpl;
+import se.gokopen.model.Patrol;
+import se.gokopen.model.Station;
 import se.gokopen.model.Track;
 
-//@Component("PatrolDAO")
+
 @Repository
-//@Transactional
 public class PatrolDAO {
 	
 	@Autowired
     private SessionFactory sessionFactory;
 	
 	
-	public void save(PatrolImpl patrol) throws PatrolNotSavedException{
+	public void save(Patrol patrol) throws PatrolNotSavedException{
 		sessionFactory.getCurrentSession().saveOrUpdate(patrol);
 	}
 
-	public void delete(PatrolImpl patrol) throws PatrolNotFoundException{
+	public void delete(Patrol patrol) throws PatrolNotFoundException{
 		sessionFactory.getCurrentSession().delete(patrol);
 	}
 
 	public void deleteById(Integer id) throws PatrolNotFoundException{
-		PatrolImpl patrol = getById(id);
+		Patrol patrol = getById(id);
 		sessionFactory.getCurrentSession().delete(patrol);
 	}
 
 	@SuppressWarnings("unchecked")
-	public PatrolImpl getById(final Integer id) throws PatrolNotFoundException{
-		PatrolImpl patrol = null;
+	public Patrol getById(final Integer id) throws PatrolNotFoundException{
+		Patrol patrol = null;
 		
-		List<PatrolImpl> patrols = (List<PatrolImpl>) sessionFactory.getCurrentSession().createQuery("from PatrolImpl patr where patr.patrolId=?").setParameter(0, id).list();
+		List<Patrol> patrols = (List<Patrol>) sessionFactory.getCurrentSession().createQuery("from Patrol patr where patr.patrolId= :patrid").setParameter("patrid", id).list();
 		if (patrols==null || patrols.isEmpty() || patrols.size()>1){
 			throw new PatrolNotFoundException("Hittar inte patrullen med id: " + id);
 		}
@@ -45,24 +47,72 @@ public class PatrolDAO {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<PatrolImpl> getAllPatrols(){
-		List<PatrolImpl> patrols = sessionFactory.getCurrentSession().createQuery("from PatrolImpl as ptr order by ptr.patrolName asc").list();
+	public List<Patrol> getAllPatrols(){
+	    List<Patrol> patrols = sessionFactory.getCurrentSession().createQuery("from Patrol as ptr order by ptr.patrolName asc").setCacheable(true).list();
+		return patrols;
+//	    Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Patrol.class);
+//      criteria.addOrder(Order.asc("patrolName"));
+//      return (List<Patrol>) new LinkedHashSet<Patrol>(criteria.list());
+//		 Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Patrol.class);
+//	        criteria.setFetchMode("track", FetchMode.JOIN);
+//	        criteria.setFetchMode("scores", FetchMode.JOIN);
+//	        criteria.addOrder(Order.asc("patrolName"));
+//	        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+//	        criteria.setCacheable(true);
+//	        List<Patrol> patrols = criteria.list();
+//	        return patrols;
+	       
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Patrol> getAllPatrolsCriteria(){
+	    Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Patrol.class);
+        criteria.setFetchMode("track", FetchMode.JOIN);
+        criteria.setFetchMode("scores", FetchMode.JOIN);
+        criteria.addOrder(Order.asc("patrolName"));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        criteria.setCacheable(true);
+        List<Patrol> patrols = criteria.list();
+        return patrols;
+	}
+	
+	
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<Patrol> getPatrolsByTrackId(Integer trackId){
+		List<Patrol> patrols = sessionFactory.getCurrentSession().createQuery("from Patrol patr where patr.fk_track= :trackid order by patr.patrolName asc").setParameter("trackid",trackId).list();
 		return patrols;
 	}
 	
-
 	@SuppressWarnings("unchecked")
-	public List<PatrolImpl> getPatrolsByTrackId(Integer trackId){
-		List<PatrolImpl> patrols = sessionFactory.getCurrentSession().createQuery("from PatrolImpl patr where patr.fk_track=? order by patr.patrolName asc").setParameter(0,trackId).list();
+	public List<Patrol> getPatrolsByTrack(Track track){
+		List<Patrol> patrols = sessionFactory.getCurrentSession().createQuery("from Patrol patr where patr.track= :track order by patr.patrolName asc").setParameter("track",track).list();
 		return patrols;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<PatrolImpl> getPatrolsByTrack(Track track){
-		List<PatrolImpl> patrols = sessionFactory.getCurrentSession().createQuery("from PatrolImpl patr where patr.track=? order by patr.patrolName asc").setParameter(0,track).list();
-		Collections.sort(patrols);
+	public List<Patrol> getAllPatrolsSortedByStatus(){
+	    List<Patrol> patrols = sessionFactory.getCurrentSession().createQuery("from Patrol patr order by patr.status asc").list();
+	    return patrols;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Patrol> getAllPatrolsSortedByTroop(){
+	    List<Patrol> patrols = sessionFactory.getCurrentSession().createQuery("from Patrol patr order by patr.troop asc").list();
+        return patrols;
+	}
+	
+	@SuppressWarnings("unchecked")
+    public List<Patrol> getAllPatrolsSortedByTrack() {
+        List<Patrol> patrols = sessionFactory.getCurrentSession().createQuery("from Patrol patr order by patr.track asc").list();
+        return patrols;
+    }
+
+	@SuppressWarnings("unchecked")
+	public List<Patrol> getAllPatrolsByStartStation(Station station) {
+		List<Patrol> patrols = sessionFactory.getCurrentSession().createQuery("from Patrol patr where patr.startStation= :station order by patr.patrolName asc").setParameter("station", station).list();
 		return patrols;
 	}
-
 }
 

@@ -3,11 +3,18 @@ package se.gokopen.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 
 @Entity
 @Table(name="station")
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Station {
 	private Integer stationId;
 	private int stationNumber;
@@ -19,16 +26,15 @@ public class Station {
 	private String stationContact;
 	private String stationPhonenumber;
 	private String stationUser;
-
-	
-	
+	private Boolean waypoint = false; 
 	
 	public Station(){
 		
 	}
 
 	@Id
-	@GeneratedValue
+	@SequenceGenerator(name = "stationSeqGen", sequenceName = "STATION_SEQ", initialValue = 1, allocationSize = 5)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "stationSeqGen")
 	@Column(name="stationid", nullable=false)
 	public Integer getStationId() {
 		return stationId;
@@ -120,9 +126,18 @@ public class Station {
 	public String getStationUser() {
 		return stationUser;
 	}
-
-	@Override
-	public String toString(){
-		return String.valueOf(stationId);
+	
+	@Column(name="waypoint")
+	public Boolean getWaypoint() {
+		return waypoint;
 	}
+
+	public void setWaypoint(Boolean waypoint) {
+		this.waypoint = waypoint;
+	}
+	
+	@Override
+    public String toString() {
+        return String.valueOf(stationId);
+    }
 }
